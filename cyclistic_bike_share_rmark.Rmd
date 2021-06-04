@@ -4,7 +4,6 @@ author: "tk"
 date: "6/4/2021"
 output:
   html_document:
-    keep_md: true
     toc: true
     toc_depth: 2
 ---
