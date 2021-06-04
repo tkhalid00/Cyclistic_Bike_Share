@@ -3,7 +3,7 @@ title: "Cyclistic Bike Share - Analysis"
 author: "tk"
 date: "6/4/2021"
 output:
-  html_document:
+  github_document:
     toc: true
     toc_depth: 2
 ---
@@ -26,4 +26,6 @@ Members category is more profitable and it will lead to future growth of the com
 # Step-1 - Ask - Define the Business Task
 
 The business task at hand is to increase the number of riders in **Members** category. Following is the business task statement:\
->To find a comprehensive strategy to convert casual ridert to members category to maximize the prospects of long term growth and profitability of the Cyclistics
+>To find a comprehensive strategy to convert casual ridert to members category to maximize the prospects of long term growth and profitability of the Cyclistics.
+
+# Step-2 - Pr
