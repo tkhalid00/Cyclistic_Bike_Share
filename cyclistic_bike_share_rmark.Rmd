@@ -4,6 +4,10 @@ author: "tk"
 date: "6/4/2021"
 output:
   html_document:
+<<<<<<< HEAD
+=======
+    keep_md: true
+>>>>>>> ca45504562b026720c307db0d740b58fd227d932
     toc: true
     toc_depth: 2
 ---
