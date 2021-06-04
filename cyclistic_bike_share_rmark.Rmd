@@ -31,4 +31,6 @@ The business task at hand is to increase the number of riders in **Members** cat
 
 # Step-2 - Prepare - Check the Authenticity and Reliability of Data
 In order assess the data, it needs to be looked at. Although, the tool for analysis will be decided in next stage, but before going there, we have to make sure that this data is reliable enough that it has the worth to be analyzed further. We need to check the data for following parameters:
-1. 
+1. Where is the data is located? Since the data is provided by the company itself, and no second party or third party is involved, there is a high probability that data is reliable.
+2. How is data organized? Data is organized in `.csv` file format and named in pretty conventional and easy to understand way. name starts with year, followed by month number.
+3. 
