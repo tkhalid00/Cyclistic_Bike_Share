@@ -88,11 +88,9 @@ save(df2, file = "data/df2.rdata")
 
 load("data/df2.rdata")
 
-df2
 class(df2)
 
 # Data wrangling ==============
-
 
 # introduce a new column variable that can calculate trip length
 # use duration calculation operator to calculate the trip duration
@@ -107,13 +105,16 @@ trip_dur <- df2 %>%
 trip_dur
 
 
-# add this new useful variable to the data frame under observation
+# add this new useful variable to the data frame df2
 
 df2 <- df2 %>% 
   mutate(trip_dur)
 
 glimpse(df2)
 summary(df2$trip_dur)
+
+# draw a boxplot to have a clear view of scattered data
+boxplot(df2$trip_dur, ylab = "trip duration (in minutes)")
 
 
 # add a variable of type Date, it will make it easier to analyze data
@@ -129,7 +130,7 @@ par(mfrow = c(1, 2), cex = 0.7)
 hist(df2$trip_dur)
 boxplot(df2$trip_dur)
 
-
+dev.off()
 
 # add a weekday column
 

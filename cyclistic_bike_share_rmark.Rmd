@@ -45,18 +45,21 @@ Now when we have assessed the quality and source of data and have it downloaded 
 
 In order to process data before analysis, the first task is to import data into R. To do so, a couple of packages needs to be installed/loaded. You can write the following code to load these libraries:
 
-```{r, message = FALSE}
+```{r Load-Libraries, message = FALSE}
 library(tidyverse) # This package is a combination of different packages required for data wrangling, analysis and visualization.
+  
 library(lubridate) # This package deals with manipulation of dates.
+  
 library(scales) # This package helps simplify scales while drawing different graphs and charts.
+  
 library(cowplot) # This package is helpful if multiple plots are required to be produced or saved side by side.
 ```
 
 Next we need to import data into R studio to have an initial look of the given data. Due to large size of `*.csv` files, this code will not be executed in following chunks, and, hence will be commented out.  
 
-First step to import these files into R is to get all the names of `*.csv` data files in the folder where these files are stored. Since I used `data/unconditioned_data` folder to download and store these files, I have given the path and used `list.files` of all `.csv` files in given folder.
+First step to import these files into R is to get all the names of `*.csv` data files in the folder where these files are stored. Since I used `data/unconditioned_data` folder to download and store these files, I have given the path and used `list.files()` to get the names of all `.csv` files in given folder.
 
-```{r}
+```{r Create-list-of-csv-files}
 # # get all the file names with their path in a variable ===========
 # 
 # list_of_files <- list.files("data/unconditioned_data", pattern = "*.csv", 
@@ -66,9 +69,9 @@ First step to import these files into R is to get all the names of `*.csv` data 
 # length(list_of_files)
 ```
 
-Before moving further, instead of importing all the files together, its a good practice that we select a single file from above created list and import to check its structure and get a feel of raw data. Again, due to high volume these `.csv` files, this code will not be executed here. We will start our analysis once we get all the data in a single file that is compatible with R and easy to use to maipulate and analyze data.
+Before moving further, instead of importing all the files together, its a good practice that we select a single file from above created list and import to check its structure and get a feel of raw data. Again, due to high volume these `.csv` files, this code will not be executed here. We will start our analysis once we get all the data in a single file that is compatible with R and easy to use to manipulate and analyze data.
 
-```{r}
+```{r check-file-structure}
 # # before combining these files, we need to make sure that these files are being
 # # combined in the right format. To ascertain the right file structure, import a 
 # # a single file into R, and check the variables and define the variable type,
@@ -88,7 +91,7 @@ As these `.csv` file names are stored as a list in R, the next step is to import
 * T = `dateTime` of class `POSIXct`
 * d = `double`
 
-```{r}
+```{r import-data-in-R-data-frame}
 # # To Combine Data into a Data Frame =======
 # 
 # # use map_df function to match all the extracted data into a data frame variable
@@ -111,7 +114,7 @@ After import of 12 no. of `.csv` into a single R compatible data frame vector, w
 2. `.rdata` files can be imported easily into `R` Environment and they can be loaded instantly without a requirement of doing any data format conversions.
 Now, this master data will be saved as `.rdata` file
 
-```{r}
+```{r save-as-rdata}
 # # Save and .Rdata for saving data files ======
 # 
 # # Use "Save" and ".rdata" extension to reduce storage size of data file
@@ -123,9 +126,9 @@ Now, this master data will be saved as `.rdata` file
 
 ```
 
-Finally, we are able to get our hands on a `.rdata` file that can be easily loaded into `R` environment, so from now on all the code chunks will be compiled and executed. First load `.rdata` file into the system.
+Finally, we are able to get our hands on a `.rdata` file that can be easily loaded into R environment, so from now on all the code chunks will be compiled and executed. First load `.rdata` file into the system.
 
-```{r}
+```{r load-rdata-file}
 # Another advantage of .rdata file is that it can be easily loaded into R
 # environment within seconds . This file can be carried anywhere in any other 
 # R project, without the need of carrying original bulk spaced .csv files.
@@ -137,5 +140,78 @@ glimpse(tripdata_df)
 
 ```
 
-We just have to name the `.rdata` file in destination folder, it will create its `R` variable itself and will be ready to use in seconds. `glimps()' function is on
+We just have to name the `.rdata` file in destination folder to load it by using `load()`, it will create its R variable itself and will be ready to use in seconds. `glimpse()` function is very useful member of `pillar` package and it literally provides an outlook/structure of the given object.  
+
+Although, it's not a requirement, but personally I have found it to be a good practice if we do not operate on our master data frame for data wrangling and manipulation in order to avoid any accidental data over writing on our master data. Therefore, we are going to create a copy of our master data frame. Although, it will take some space but this additional space usage is worth it as this precautionary measure can save our master data from any accidental loss or damage.  
+
+```{r master-data-set-copy}
+# Make a copy of original dataset to avoid over writing original dataset
+
+df2 <- tripdata_df
+
+
+# make a new data frame with this information
+save(df2, file = "data/df2.rdata")
+
+
+## Load 'df2' dataset
+
+load("data/df2.rdata")
+
+class(df2)
+
+```
+
+
+Now when we have our data ready, we need to add some more variables into our data frame for getting this data ready for analysis. 
+Since this data set is all about cycle trips, the most important parameter in this data set is the trip duration. We will introduce a new variable with the name of `trip_dur` which will store the total time of each trip. `%--%` is a trip duration calculation operator that is used calculate time when given start and end time in `POSIXct` format.
+
+```{r tirp-calculator}
+# Data wrangling ==============
+
+# arrange data with resepct to date and time
+
+df2 <- df2 %>% 
+  arrange(started_at)
+
+df2
+
+# introduce a new column variable that can calculate trip length
+# use duration calculation operator to calculate the trip duration
+
+trip_dur <- df2 %>% 
+  with(started_at %--% ended_at) %>%
+  as.duration() %>% 
+  as.numeric("minutes") %>% 
+  round(2)
+
+# add this new useful variable to the data frame df2
+
+df2 <- df2 %>% 
+  mutate(trip_dur)
+
+glimpse(df2)
+summary(df2$trip_dur)
+```
+
+`smmmary()` of this new variable shows that there is at least one trip duration that is negative, i.e. less than zero. Since, its not possible to have a negative trip duration, so data set needs further investigation. For the purpose, a boxplot will be drawn.
+
+```{r}
+# draw a boxplot to have a clear view of scattered data
+# draw a boxplot to have a clear view of trip duration 
+ggplot(df2) +
+  geom_boxplot(aes(x = trip_dur)) +
+  labs(title = "Boxplot for Trip Duration", x = "Trip Duration (in minutes)") +
+  scale_x_continuous(labels = scales::comma)
+
+# save this boxplot
+ggsave("fig_out/00_0_neg_values_trip_duration.png")
+
+```
+
+
+
+
+
+
 

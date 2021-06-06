@@ -204,11 +204,14 @@ pre code {
 <p>Now when we have assessed the quality and source of data and have it downloaded to a secure location, the next step is to make data ready for analysis. Although there are many tools that can help analyze the data, I have used R to explore, analyze and then visualize the given dataset. There are number of reasons for doing so. 1. Data set is too large to manipulate in Excel. While Excel is a wonderful tool to analyze and visualize small-to-medium sized data sets, it has its limitation when it comes to large data sets. Excel can easily be slowed down by any huge dataset. Current data set contains almost 4 million rows and for Excel its too much of a task to go through this rows quickly. 2. Another option is using SQL. No doubt that SQL is much faster than Excel in handling these large data sets, but it needs some external server where data needs to be uploaded and where queries can be run to extract and manipulate data. Due to large size of <code>.csv</code> files, it was a challenging task to upload these data files to some external environment like Google Cloud services. These external cloud are exceptionally good with data storage and query execution, but most of the times these services offer limited access with free accounts. 3. Finally, I decided to go with R, not because it’s an open source programming platform, but offers great flexibility in terms of manipulating and visualizing data. It’s kind of one stop shop where you can perform many task without incurring any cost.</p>
 <p>In order to process data before analysis, the first task is to import data into R. To do so, a couple of packages needs to be installed/loaded. You can write the following code to load these libraries:</p>
 <pre class="r"><code>library(tidyverse) # This package is a combination of different packages required for data wrangling, analysis and visualization.
+  
 library(lubridate) # This package deals with manipulation of dates.
+  
 library(scales) # This package helps simplify scales while drawing different graphs and charts.
+  
 library(cowplot) # This package is helpful if multiple plots are required to be produced or saved side by side.</code></pre>
 <p>Next we need to import data into R studio to have an initial look of the given data. Due to large size of <code>*.csv</code> files, this code will not be executed in following chunks, and, hence will be commented out.</p>
-<p>First step to import these files into R is to get all the names of <code>*.csv</code> data files in the folder where these files are stored. Since I used <code>data/unconditioned_data</code> folder to download and store these files, I have given the path and used <code>list.files</code> of all <code>.csv</code> files in given folder.</p>
+<p>First step to import these files into R is to get all the names of <code>*.csv</code> data files in the folder where these files are stored. Since I used <code>data/unconditioned_data</code> folder to download and store these files, I have given the path and used <code>list.files()</code> to get the names of all <code>.csv</code> files in given folder.</p>
 <pre class="r"><code># # get all the file names with their path in a variable ===========
 # 
 # list_of_files &lt;- list.files(&quot;data/unconditioned_data&quot;, pattern = &quot;*.csv&quot;, 
@@ -216,7 +219,7 @@ library(cowplot) # This package is helpful if multiple plots are required to be 
 # list_of_files
 # class(list_of_files)
 # length(list_of_files)</code></pre>
-<p>Before moving further, instead of importing all the files together, its a good practice that we select a single file from above created list and import to check its structure and get a feel of raw data. Again, due to high volume these <code>.csv</code> files, this code will not be executed here. We will start our analysis once we get all the data in a single file that is compatible with R and easy to use to maipulate and analyze data.</p>
+<p>Before moving further, instead of importing all the files together, its a good practice that we select a single file from above created list and import to check its structure and get a feel of raw data. Again, due to high volume these <code>.csv</code> files, this code will not be executed here. We will start our analysis once we get all the data in a single file that is compatible with R and easy to use to manipulate and analyze data.</p>
 <pre class="r"><code># # before combining these files, we need to make sure that these files are being
 # # combined in the right format. To ascertain the right file structure, import a 
 # # a single file into R, and check the variables and define the variable type,
@@ -251,7 +254,7 @@ library(cowplot) # This package is helpful if multiple plots are required to be 
 # 
 
 # save(tripdata_df, file = &quot;data/master_data.rdata&quot;)</code></pre>
-<p>Finally, we are able to get our hands on a <code>.rdata</code> file that can be easily loaded into <code>R</code> environment, so from now on all the code chunks will be compiled and executed. First load <code>.rdata</code> file into the system.</p>
+<p>Finally, we are able to get our hands on a <code>.rdata</code> file that can be easily loaded into R environment, so from now on all the code chunks will be compiled and executed. First load <code>.rdata</code> file into the system.</p>
 <pre class="r"><code># Another advantage of .rdata file is that it can be easily loaded into R
 # environment within seconds . This file can be carried anywhere in any other 
 # R project, without the need of carrying original bulk spaced .csv files.
@@ -275,7 +278,91 @@ glimpse(tripdata_df)</code></pre>
 ## $ end_lat            &lt;dbl&gt; 41.9322, 41.9306, 41.8679, 41.8992, 41.9695, 41.892~
 ## $ end_lng            &lt;dbl&gt; -87.6586, -87.7238, -87.6230, -87.6722, -87.6547, -~
 ## $ member_casual      &lt;fct&gt; member, member, member, member, casual, member, mem~</code></pre>
-<p>We just have to name the <code>.rdata</code> file in destination folder, it will create its <code>R</code> variable itself and will be ready to use in seconds. `glimps()’ function is on</p>
+<p>We just have to name the <code>.rdata</code> file in destination folder to load it by using <code>load()</code>, it will create its R variable itself and will be ready to use in seconds. <code>glimpse()</code> function is very useful member of <code>pillar</code> package and it literally provides an outlook/structure of the given object.</p>
+<p>Although, it’s not a requirement, but personally I have found it to be a good practice if we do not operate on our master data frame for data wrangling and manipulation in order to avoid any accidental data over writing on our master data. Therefore, we are going to create a copy of our master data frame. Although, it will take some space but this additional space usage is worth it as this precautionary measure can save our master data from any accidental loss or damage.</p>
+<pre class="r"><code># Make a copy of original dataset to avoid over writing original dataset
+
+df2 &lt;- tripdata_df
+
+
+# make a new data frame with this information
+save(df2, file = &quot;data/df2.rdata&quot;)
+
+
+## Load &#39;df2&#39; dataset
+
+load(&quot;data/df2.rdata&quot;)
+
+class(df2)</code></pre>
+<pre><code>## [1] &quot;spec_tbl_df&quot; &quot;tbl_df&quot;      &quot;tbl&quot;         &quot;data.frame&quot;</code></pre>
+<p>Now when we have our data ready, we need to add some more variables into our data frame for getting this data ready for analysis. Since this data set is all about cycle trips, the most important parameter in this data set is the trip duration. We will introduce a new variable with the name of <code>trip_dur</code> which will store the total time of each trip. <code>%--%</code> is a trip duration calculation operator that is used calculate time when given start and end time in <code>POSIXct</code> format.</p>
+<pre class="r"><code># Data wrangling ==============
+
+# arrange data with resepct to date and time
+
+df2 &lt;- df2 %&gt;% 
+  arrange(started_at)
+
+df2</code></pre>
+<pre><code>## # A tibble: 3,489,748 x 13
+##    ride_id          rideable_type started_at          ended_at           
+##    &lt;chr&gt;            &lt;fct&gt;         &lt;dttm&gt;              &lt;dttm&gt;             
+##  1 5DB63F4E4EB6A9CF docked_bike   2020-04-01 00:00:30 2020-04-01 00:23:03
+##  2 1FD159E93F7BAFA1 docked_bike   2020-04-01 00:02:35 2020-04-01 00:10:45
+##  3 6D93A270684EC452 docked_bike   2020-04-01 00:02:41 2020-04-01 00:24:20
+##  4 091D47E4F0FC5022 docked_bike   2020-04-01 00:06:44 2020-04-01 00:14:01
+##  5 07F785C9DDA3404C docked_bike   2020-04-01 00:11:18 2020-04-01 00:11:51
+##  6 643593E85E46A45C docked_bike   2020-04-01 00:13:36 2020-04-01 00:18:59
+##  7 782CEA3C6968D2A6 docked_bike   2020-04-01 00:13:41 2020-04-01 00:19:09
+##  8 432C76DCFB84366A docked_bike   2020-04-01 00:21:54 2020-04-01 00:27:20
+##  9 7912522A5308E3DA docked_bike   2020-04-01 00:23:52 2020-04-01 00:34:42
+## 10 545019BF3EF4B419 docked_bike   2020-04-01 00:39:21 2020-04-01 00:43:19
+## # ... with 3,489,738 more rows, and 9 more variables: start_station_name &lt;chr&gt;,
+## #   start_station_id &lt;chr&gt;, end_station_name &lt;chr&gt;, end_station_id &lt;chr&gt;,
+## #   start_lat &lt;dbl&gt;, start_lng &lt;dbl&gt;, end_lat &lt;dbl&gt;, end_lng &lt;dbl&gt;,
+## #   member_casual &lt;fct&gt;</code></pre>
+<pre class="r"><code># introduce a new column variable that can calculate trip length
+# use duration calculation operator to calculate the trip duration
+
+trip_dur &lt;- df2 %&gt;% 
+  with(started_at %--% ended_at) %&gt;%
+  as.duration() %&gt;% 
+  as.numeric(&quot;minutes&quot;) %&gt;% 
+  round(2)
+
+# add this new useful variable to the data frame df2
+
+df2 &lt;- df2 %&gt;% 
+  mutate(trip_dur)
+
+glimpse(df2)</code></pre>
+<pre><code>## Rows: 3,489,748
+## Columns: 14
+## $ ride_id            &lt;chr&gt; &quot;5DB63F4E4EB6A9CF&quot;, &quot;1FD159E93F7BAFA1&quot;, &quot;6D93A27068~
+## $ rideable_type      &lt;fct&gt; docked_bike, docked_bike, docked_bike, docked_bike,~
+## $ started_at         &lt;dttm&gt; 2020-04-01 00:00:30, 2020-04-01 00:02:35, 2020-04-~
+## $ ended_at           &lt;dttm&gt; 2020-04-01 00:23:03, 2020-04-01 00:10:45, 2020-04-~
+## $ start_station_name &lt;chr&gt; &quot;Damen Ave &amp; Wellington Ave&quot;, &quot;Wabash Ave &amp; 16th St~
+## $ start_station_id   &lt;chr&gt; &quot;162&quot;, &quot;72&quot;, &quot;162&quot;, &quot;173&quot;, &quot;321&quot;, &quot;74&quot;, &quot;74&quot;, &quot;240&quot;~
+## $ end_station_name   &lt;chr&gt; &quot;Pine Grove Ave &amp; Waveland Ave&quot;, &quot;Wabash Ave &amp; 9th ~
+## $ end_station_id     &lt;chr&gt; &quot;232&quot;, &quot;321&quot;, &quot;506&quot;, &quot;301&quot;, &quot;321&quot;, &quot;359&quot;, &quot;359&quot;, &quot;2~
+## $ start_lat          &lt;dbl&gt; 41.9359, 41.8604, 41.9359, 41.8969, 41.8708, 41.893~
+## $ start_lng          &lt;dbl&gt; -87.6784, -87.6258, -87.6784, -87.6217, -87.6257, -~
+## $ end_lat            &lt;dbl&gt; 41.9493, 41.8708, 41.9171, 41.9080, 41.8708, 41.903~
+## $ end_lng            &lt;dbl&gt; -87.6463, -87.6257, -87.7102, -87.6315, -87.6257, -~
+## $ member_casual      &lt;fct&gt; casual, member, casual, member, member, member, mem~
+## $ trip_dur           &lt;dbl&gt; 22.55, 8.17, 21.65, 7.28, 0.55, 5.38, 5.47, 5.43, 1~</code></pre>
+<pre class="r"><code>summary(df2$trip_dur)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## -29049.97      7.88     14.52     24.77     26.63  58720.03</code></pre>
+<p><code>smmmary()</code> of this new variable shows that there is at least one trip duration that is negative, i.e. less than zero. Since, its not possible to have a negative trip duration, so data set needs further investigation. For the purpose, a boxplot will be drawn.</p>
+<pre class="r"><code># draw a boxplot to have a clear view of scattered data
+# draw a boxplot to have a clear view of trip duration 
+ggplot(df2) +
+  geom_boxplot(aes(x = trip_dur)) +
+  labs(title = &quot;Boxplot for Trip Duration&quot;, x = &quot;Trip Duration (in minutes)&quot;) +
+  scale_x_continuous(labels = scales::comma)</code></pre>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 
 
