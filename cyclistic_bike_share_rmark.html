@@ -202,6 +202,37 @@ pre code {
 <div id="step-3---process---start-navigating-through-given-data" class="section level1">
 <h1>Step-3 - Process - Start Navigating Through Given Data</h1>
 <p>Now when we have assessed the quality and source of data and have it downloaded to a secure location, the next step is to make data ready for analysis. Although there are many tools that can help analyze the data, I have used R to explore, analyze and then visualize the given dataset. There are number of reasons for doing so. 1. Data set is too large to manipulate in Excel. While Excel is a wonderful tool to analyze and visualize small-to-medium sized data sets, it has its limitation when it comes to large data sets. Excel can easily be slowed down by any huge dataset. Current data set contains almost 4 million rows and for Excel its too much of a task to go through this rows quickly. 2. Another option is using SQL. No doubt that SQL is much faster than Excel in handling these large data sets, but it needs some external server where data needs to be uploaded and where queries can be run to extract and manipulate data. Due to large size of <code>.csv</code> files, it was a challenging task to upload these data files to some external environment like Google Cloud services. These external cloud are exceptionally good with data storage and query execution, but most of the times these services offer limited access with free accounts. 3. Finally, I decided to go with R, not because it’s an open source programming platform, but offers great flexibility in terms of manipulating and visualizing data. It’s kind of one stop shop where you can perform many task without incurring any cost.</p>
+<p>In order to process data before analysis, the first task is to import data into R. To do so, a couple of packages needs to be installed/loaded. You can write the following code to load these libraries:</p>
+<pre class="r"><code>library(tidyverse) # This package is a combination of different packages required for data wrangling, analysis and visualization.</code></pre>
+<pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
+<pre><code>## v ggplot2 3.3.3     v purrr   0.3.4
+## v tibble  3.1.0     v dplyr   1.0.5
+## v tidyr   1.1.3     v stringr 1.4.0
+## v readr   1.4.0     v forcats 0.5.1</code></pre>
+<pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(lubridate) # This package deals with manipulation of dates.</code></pre>
+<pre><code>## 
+## Attaching package: &#39;lubridate&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     date, intersect, setdiff, union</code></pre>
+<pre class="r"><code>library(scales) # This package helps simplify scales while drawing different graphs and charts.</code></pre>
+<pre><code>## 
+## Attaching package: &#39;scales&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     discard</code></pre>
+<pre><code>## The following object is masked from &#39;package:readr&#39;:
+## 
+##     col_factor</code></pre>
+<pre class="r"><code>library(cowplot) # This package is helpful if multiple plots are required to be produced or saved side by side.</code></pre>
+<pre><code>## 
+## Attaching package: &#39;cowplot&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:lubridate&#39;:
+## 
+##     stamp</code></pre>
 </div>
 
 

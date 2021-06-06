@@ -43,4 +43,78 @@ Now when we have assessed the quality and source of data and have it downloaded 
 2. Another option is using SQL. No doubt that SQL is much faster than Excel in handling these large data sets, but it needs some external server where data needs to be uploaded and where queries can be run to extract and manipulate data. Due to large size of `.csv` files, it was a challenging task to upload these data files to some external environment like Google Cloud services. These external cloud are exceptionally good with data storage and query execution, but most of the times these services offer limited access with free accounts.
 3. Finally, I decided to go with R, not because it's an open source programming platform, but offers great flexibility in terms of manipulating and visualizing data. It's kind of one stop shop where you can perform many task without incurring any cost.
 
+In order to process data before analysis, the first task is to import data into R. To do so, a couple of packages needs to be installed/loaded. You can write the following code to load these libraries:
+
+
+```r
+library(tidyverse) # This package is a combination of different packages required for data wrangling, analysis and visualization.
+```
+
+```
+## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
+```
+
+```
+## v ggplot2 3.3.3     v purrr   0.3.4
+## v tibble  3.1.0     v dplyr   1.0.5
+## v tidyr   1.1.3     v stringr 1.4.0
+## v readr   1.4.0     v forcats 0.5.1
+```
+
+```
+## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+```
+
+```r
+library(lubridate) # This package deals with manipulation of dates.
+```
+
+```
+## 
+## Attaching package: 'lubridate'
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     date, intersect, setdiff, union
+```
+
+```r
+library(scales) # This package helps simplify scales while drawing different graphs and charts.
+```
+
+```
+## 
+## Attaching package: 'scales'
+```
+
+```
+## The following object is masked from 'package:purrr':
+## 
+##     discard
+```
+
+```
+## The following object is masked from 'package:readr':
+## 
+##     col_factor
+```
+
+```r
+library(cowplot) # This package is helpful if multiple plots are required to be produced or saved side by side.
+```
+
+```
+## 
+## Attaching package: 'cowplot'
+```
+
+```
+## The following object is masked from 'package:lubridate':
+## 
+##     stamp
+```
 
