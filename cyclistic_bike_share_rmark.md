@@ -46,10 +46,6 @@ Now when we have assessed the quality and source of data and have it downloaded 
 In order to process data before analysis, the first task is to import data into R. To do so, a couple of packages needs to be installed/loaded. You can write the following code to load these libraries:
 
 
-```r
-library(tidyverse) # This package is a combination of different packages required for data wrangling, analysis and visualization.
-```
-
 ```
 ## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
 ```
@@ -67,10 +63,6 @@ library(tidyverse) # This package is a combination of different packages require
 ## x dplyr::lag()    masks stats::lag()
 ```
 
-```r
-library(lubridate) # This package deals with manipulation of dates.
-```
-
 ```
 ## 
 ## Attaching package: 'lubridate'
@@ -80,10 +72,6 @@ library(lubridate) # This package deals with manipulation of dates.
 ## The following objects are masked from 'package:base':
 ## 
 ##     date, intersect, setdiff, union
-```
-
-```r
-library(scales) # This package helps simplify scales while drawing different graphs and charts.
 ```
 
 ```
@@ -101,10 +89,6 @@ library(scales) # This package helps simplify scales while drawing different gra
 ## The following object is masked from 'package:readr':
 ## 
 ##     col_factor
-```
-
-```r
-library(cowplot) # This package is helpful if multiple plots are required to be produced or saved side by side.
 ```
 
 ```
