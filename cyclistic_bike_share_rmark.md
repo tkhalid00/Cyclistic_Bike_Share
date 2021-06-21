@@ -195,7 +195,7 @@ Since this data set is all about cycle trips, the most important parameter in th
 ```r
 # Data wrangling ==============
 
-# arrange data with resepct to date and time
+# arrange data with respect to date and time
 
 df2 <- df2 %>% 
   arrange(started_at)
@@ -283,7 +283,16 @@ ggplot(df2) +
 
 ![](cyclistic_bike_share_rmark_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
 
+```r
+# save this boxplot
+ggsave("fig_out/00_0_neg_values_trip_duration.png")
+```
 
+```
+## Saving 7 x 5 in image
+```
+
+As we can see there are number of instances where negative trip duration has been recorded in data. To check the 
 
 
 

@@ -169,7 +169,7 @@ Since this data set is all about cycle trips, the most important parameter in th
 ```{r tirp-calculator}
 # Data wrangling ==============
 
-# arrange data with resepct to date and time
+# arrange data with respect to date and time
 
 df2 <- df2 %>% 
   arrange(started_at)
@@ -196,7 +196,7 @@ summary(df2$trip_dur)
 
 `smmmary()` of this new variable shows that there is at least one trip duration that is negative, i.e. less than zero. Since, its not possible to have a negative trip duration, so data set needs further investigation. For the purpose, a boxplot will be drawn.
 
-```{r}
+```{r all-values-box-plot}
 # draw a boxplot to have a clear view of scattered data
 # draw a boxplot to have a clear view of trip duration 
 ggplot(df2) +
@@ -209,6 +209,13 @@ ggsave("fig_out/00_0_neg_values_trip_duration.png")
 
 ```
 
+As we can see there are number of instances where negative trip duration has been recorded in data. In order to check total number of negative duration values, we will use `filter` to check exact number of these values and their spread.
+
+```{r duration-negative-values}
+neg_dur <- df2 %>% 
+  filter(trip_dur < 0)
+dim(neg_dur)
+```
 
 
 

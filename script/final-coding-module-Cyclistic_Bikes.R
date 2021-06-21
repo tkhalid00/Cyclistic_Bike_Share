@@ -92,6 +92,12 @@ class(df2)
 
 # Data wrangling ==============
 
+# arrange data with resepct to date and time
+
+df2 <- df2 %>% 
+  arrange(started_at)
+
+
 # introduce a new column variable that can calculate trip length
 # use duration calculation operator to calculate the trip duration
 
@@ -113,8 +119,21 @@ df2 <- df2 %>%
 glimpse(df2)
 summary(df2$trip_dur)
 
-# draw a boxplot to have a clear view of scattered data
-boxplot(df2$trip_dur, ylab = "trip duration (in minutes)")
+# draw a boxplot to have a clear view of trip duration 
+ggplot(df2) +
+  geom_boxplot(aes(x = trip_dur)) +
+  labs(title = "Boxplot for Trip Duration", x = "Trip Duration (in minutes)") +
+  scale_x_continuous(labels = scales::comma)
+
+# save this boxplot
+ggsave("fig_out/00_0_neg_values_trip_duration.png")
+
+
+# negative trip duration values
+neg_dur <- df2 %>% 
+  filter(trip_dur < 0)
+dim(neg_dur)
+
 
 
 # add a variable of type Date, it will make it easier to analyze data
@@ -131,6 +150,7 @@ hist(df2$trip_dur)
 boxplot(df2$trip_dur)
 
 dev.off()
+
 
 # add a weekday column
 
@@ -152,14 +172,14 @@ glimpse(df2)
 
 # add a time column to create time bins for future analysis
 
-df2$time <- factor(format(df2$started_at, "%H"), 
-                   levels = c("01", "02", "03", "04", "05", "06",
-                              "07", "08", "09", "10", "11", "12",
-                              "13", "14", "15", "16", "17", "18",
-                              "19", "20", "21", "22", "23", "00"))
+df2$time <- factor(format(df2$started_at, "%H:00")) 
+df2$time <- format(df2$started_at, "%H:00")
+df2$time <- as_datetime(format(df2$started_at, "%H:00"))
 
 df2$time
 class(df2$time)
+levels(df2$time)
+
 
 dev.off()
 par(mfrow = c(1, 2), cex = 0.7)
@@ -170,11 +190,6 @@ barplot(table(df2$day))
 df2 %>% filter(is.na(month))
 df2 %>% filter(is.na(day))
 
-
-
-neg_dur <- df2 %>% 
-  filter(trip_dur < 0)
-dim(neg_dur)
 
 
 summary(neg_dur$trip_dur)
