@@ -281,7 +281,7 @@ ggplot(df2) +
   scale_x_continuous(labels = scales::comma)
 ```
 
-![](cyclistic_bike_share_rmark_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+![](cyclistic_bike_share_rmark_files/figure-html/all-values-box-plot-1.png)<!-- -->
 
 ```r
 # save this boxplot
@@ -292,8 +292,92 @@ ggsave("fig_out/00_0_neg_values_trip_duration.png")
 ## Saving 7 x 5 in image
 ```
 
-As we can see there are number of instances where negative trip duration has been recorded in data. To check the 
+As we can see there are number of instances where negative trip duration has been recorded in data. In order to check total number of negative duration values, we will use `filter` to check exact number of these values and their spread.
 
+
+```r
+neg_dur <- df2 %>% 
+  filter(trip_dur < 0)
+glimpse(neg_dur$trip_dur)
+```
+
+```
+##  num [1:10552] -0.72 -0.18 -0.02 -0.13 -0.07 -0.33 -0.25 -0.23 -0.02 -0.25 ...
+```
+
+We can have a boxplot to check the spread of negative values in our given dataset.
+
+
+```r
+ggplot(neg_dur) +
+  geom_boxplot(aes(x = trip_dur)) +
+  labs(title = "Negative Trips", x = "Trip Durations (mins)") +
+  scale_x_continuous(labels = scales::comma)
+```
+
+![](cyclistic_bike_share_rmark_files/figure-html/negative-duration-plot-1.png)<!-- -->
+
+As the above mentioned boxplot shows that there are some values that are far away from possible minimum value of time duration i.e. 0 minutes. Let's examine the spread of these neagtive values:
+
+```r
+fivenum(neg_dur$trip_dur)
+```
+
+```
+## [1] -29049.97     -0.42     -0.22     -0.10     -0.02
+```
+From above summary, we can see that although there are some extreme negative duration values, overall negative value set is skewed towards zero. Therefore, I could remove these negative values, as extreme values are impossible to have as negative trip duration and values close to zero doesn't impact much as there are only around 10,500 negative values out of more than 4 million entries. So I am going to remove these negative values. To do so, a new dataset will be created.
+
+
+```r
+df3 <- df2 %>% 
+  filter(trip_dur >= 0 )
+
+save(df3, file = "data/df3.rdata")
+
+load("data/df3.rdata")
+glimpse(df3)
+```
+
+```
+## Rows: 3,479,196
+## Columns: 14
+## $ ride_id            <chr> "5DB63F4E4EB6A9CF", "1FD159E93F7BAFA1", "6D93A27068~
+## $ rideable_type      <fct> docked_bike, docked_bike, docked_bike, docked_bike,~
+## $ started_at         <dttm> 2020-04-01 00:00:30, 2020-04-01 00:02:35, 2020-04-~
+## $ ended_at           <dttm> 2020-04-01 00:23:03, 2020-04-01 00:10:45, 2020-04-~
+## $ start_station_name <chr> "Damen Ave & Wellington Ave", "Wabash Ave & 16th St~
+## $ start_station_id   <chr> "162", "72", "162", "173", "321", "74", "74", "240"~
+## $ end_station_name   <chr> "Pine Grove Ave & Waveland Ave", "Wabash Ave & 9th ~
+## $ end_station_id     <chr> "232", "321", "506", "301", "321", "359", "359", "2~
+## $ start_lat          <dbl> 41.9359, 41.8604, 41.9359, 41.8969, 41.8708, 41.893~
+## $ start_lng          <dbl> -87.6784, -87.6258, -87.6784, -87.6217, -87.6257, -~
+## $ end_lat            <dbl> 41.9493, 41.8708, 41.9171, 41.9080, 41.8708, 41.903~
+## $ end_lng            <dbl> -87.6463, -87.6257, -87.7102, -87.6315, -87.6257, -~
+## $ member_casual      <fct> casual, member, casual, member, member, member, mem~
+## $ trip_dur           <dbl> 22.55, 8.17, 21.65, 7.28, 0.55, 5.38, 5.47, 5.43, 1~
+```
+
+We can have a quick summary of both data sets (before and after removal negative values).
+
+```r
+summary(df2$trip_dur)
+```
+
+```
+##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## -29049.97      7.88     14.52     24.77     26.63  58720.03
+```
+
+```r
+summary(df3$trip_dur)
+```
+
+```
+##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+##     0.00     7.93    14.57    27.95    26.68 58720.03
+```
+Above data confirms that while we successfully removed negative values, it didn't impact much overall data spread or mean. Now we can add some useful new variables (columns) to our data in order to prepare it for further investigation.
 
 
 

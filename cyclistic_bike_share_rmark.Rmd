@@ -214,17 +214,43 @@ As we can see there are number of instances where negative trip duration has bee
 ```{r duration-negative-values}
 neg_dur <- df2 %>% 
   filter(trip_dur < 0)
-dim(neg_dur)
+glimpse(neg_dur$trip_dur)
 ```
 
 We can have a boxplot to check the spread of negative values in our given dataset.
 
 ```{r negative-duration-plot}
-boxplot(neg_dur)
+ggplot(neg_dur) +
+  geom_boxplot(aes(x = trip_dur)) +
+  labs(title = "Negative Trips", x = "Trip Durations (mins)") +
+  scale_x_continuous(labels = scales::comma)
 ```
 
+As the above mentioned boxplot shows that there are some values that are far away from possible minimum value of time duration i.e. 0 minutes. Let's examine the spread of these neagtive values:
+```{r}
+fivenum(neg_dur$trip_dur)
+```
+From above summary, we can see that although there are some extreme negative duration values, overall negative value set is skewed towards zero. Therefore, I could remove these negative values, as extreme values are impossible to have as negative trip duration and values close to zero doesn't impact much as there are only around 10,500 negative values out of more than 4 million entries. So I am going to remove these negative values. To do so, a new dataset will be created.
 
+```{r}
+df3 <- df2 %>% 
+  filter(trip_dur >= 0 )
 
+save(df3, file = "data/df3.rdata")
+
+load("data/df3.rdata")
+glimpse(df3)
+```
+
+We can have a quick summary of both data sets (before and after removal negative values).
+```{r}
+summary(df2$trip_dur)
+summary(df3$trip_dur)
+```
+Above data confirms that while we successfully removed negative values, it didn't impact much overall data spread or mean. Now we can add some useful new variables (columns) to our data in order to prepare it for further investigation.
+```{r}
+
+```
 
 
 
