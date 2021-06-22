@@ -217,6 +217,12 @@ neg_dur <- df2 %>%
 dim(neg_dur)
 ```
 
+We can have a boxplot to check the spread of negative values in our given dataset.
+
+```{r negative-duration-plot}
+boxplot(neg_dur)
+```
+
 
 
 
