@@ -134,30 +134,33 @@ neg_dur <- df2 %>%
   filter(trip_dur < 0)
 dim(neg_dur)
 
+# Draw negative values boxplot
+ggplot(neg_dur) +
+  geom_boxplot(aes(x = trip_dur)) +
+  labs(title = "Negative Trips", x = "Trip Durations (mins)") +
+  scale_x_continuous(labels = scales::comma)
 
+# check the spread of negative trip duration
+fivenum(neg_dur$trip_dur)
+
+# create a new data frame and remove negative values from current  data set
+
+df3 <- df2 %>% 
+  filter(trip_dur >= 0 )
+
+
+save(df3, file = "data/df3.rdata")
+
+load("data/df3.rdata")
+glimpse(df3)
+
+summary(df2$trip_dur)
+summary(df3$trip_dur)
 
 # add a variable of type Date, it will make it easier to analyze data
 
-df2$date <- as.Date(df2$started_at)
-glimpse(df2)
-
-
-
-# to view two plots together
-par(mfrow = c(1, 2), cex = 0.7)
-
-hist(df2$trip_dur)
-boxplot(df2$trip_dur)
-
-dev.off()
-
-
-# add a weekday column
-
-df2$day <- factor(format(df2$date, "%a"),
-                    level = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
-class(df2$day)
-df2$day
+df3$date <- as.Date(df3$started_at)
+glimpse(df3)
 
 # add a month column
 
@@ -168,6 +171,27 @@ class(df2$month)
 df2$month
 
 glimpse(df2)
+
+
+
+# add a weekday column
+
+df3$day <- factor(format(df3$date, "%a"),
+                  level = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
+class(df3$day)
+df3$day
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # add a time column to create time bins for future analysis
@@ -201,33 +225,29 @@ hist(neg_dur$trip_dur)
 boxplot(neg_dur$trip_dur)
 
 
-neg_dur %>% 
-  select(started_at, ended_at, trip_dur) %>% 
-  filter(trip_dur < -100) %>% 
-  sort(trip_dur, decreasing = TRUE)
-
-df2 %>% filter(trip_dur < 5 & trip_dur > 0)
 
 
 
-# create a new data frame and remove negative values from the data frame
-
-df3 <- df2 %>% 
-  filter(trip_dur >= 0 )
 
 
-save(df3, file = "data/df3.rdata")
 
-load("data/df3.rdata")
-glimpse(df3)
+
+
+
+
+
+
+
+
+
+
 
 dev.off()
 par(mfrow = c(1, 2), cex = 0.7)
 hist(df3$trip_dur)
 boxplot(df3$trip_dur)
 
-summary(df2$trip_dur)
-summary(df3$trip_dur)
+
 
 dev.off()
 par(mfrow = c(1, 2), cex = 0.7)

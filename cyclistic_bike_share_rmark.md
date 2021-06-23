@@ -54,6 +54,8 @@ library(lubridate) # This package deals with manipulation of dates.
 library(scales) # This package helps simplify scales while drawing different graphs and charts.
   
 library(cowplot) # This package is helpful if multiple plots are required to be produced or saved side by side.
+
+library(Amelia) # This package is helpful to visualize NA values in a given data set.
 ```
 
 Next we need to import data into R studio to have an initial look of the given data. Due to large size of `*.csv` files, this code will not be executed in following chunks, and, hence will be commented out.  
@@ -311,7 +313,7 @@ We can have a boxplot to check the spread of negative values in our given datase
 ```r
 ggplot(neg_dur) +
   geom_boxplot(aes(x = trip_dur)) +
-  labs(title = "Negative Trips", x = "Trip Durations (mins)") +
+  labs(title = "Negative Trips", x = "Trip Duration (mins)") +
   scale_x_continuous(labels = scales::comma)
 ```
 
@@ -377,8 +379,96 @@ summary(df3$trip_dur)
 ##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
 ##     0.00     7.93    14.57    27.95    26.68 58720.03
 ```
+
 Above data confirms that while we successfully removed negative values, it didn't impact much overall data spread or mean. Now we can add some useful new variables (columns) to our data in order to prepare it for further investigation.
 
+```r
+# add a variable of type Date, it will make it easier to analyze data
+df3$date <- as.Date(df3$started_at)
+
+# add a month column
+df3$month <- factor(format(df3$date, "%b"),
+                    level = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                              "Aug", "Sep", "Oct", "Nov", "Dec"))
+
+# add a weekday column
+df3$day <- factor(format(df3$date, "%a"),
+                  level = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
+
+df3$start_time <- factor(format(df3$started_at, "%H:00"))
+str(df3$start_time)
+```
+
+```
+##  Factor w/ 24 levels "00:00","01:00",..: 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+```r
+glimpse(df3)
+```
+
+```
+## Rows: 3,479,196
+## Columns: 18
+## $ ride_id            <chr> "5DB63F4E4EB6A9CF", "1FD159E93F7BAFA1", "6D93A27068~
+## $ rideable_type      <fct> docked_bike, docked_bike, docked_bike, docked_bike,~
+## $ started_at         <dttm> 2020-04-01 00:00:30, 2020-04-01 00:02:35, 2020-04-~
+## $ ended_at           <dttm> 2020-04-01 00:23:03, 2020-04-01 00:10:45, 2020-04-~
+## $ start_station_name <chr> "Damen Ave & Wellington Ave", "Wabash Ave & 16th St~
+## $ start_station_id   <chr> "162", "72", "162", "173", "321", "74", "74", "240"~
+## $ end_station_name   <chr> "Pine Grove Ave & Waveland Ave", "Wabash Ave & 9th ~
+## $ end_station_id     <chr> "232", "321", "506", "301", "321", "359", "359", "2~
+## $ start_lat          <dbl> 41.9359, 41.8604, 41.9359, 41.8969, 41.8708, 41.893~
+## $ start_lng          <dbl> -87.6784, -87.6258, -87.6784, -87.6217, -87.6257, -~
+## $ end_lat            <dbl> 41.9493, 41.8708, 41.9171, 41.9080, 41.8708, 41.903~
+## $ end_lng            <dbl> -87.6463, -87.6257, -87.7102, -87.6315, -87.6257, -~
+## $ member_casual      <fct> casual, member, casual, member, member, member, mem~
+## $ trip_dur           <dbl> 22.55, 8.17, 21.65, 7.28, 0.55, 5.38, 5.47, 5.43, 1~
+## $ date               <date> 2020-04-01, 2020-04-01, 2020-04-01, 2020-04-01, 20~
+## $ month              <fct> Apr, Apr, Apr, Apr, Apr, Apr, Apr, Apr, Apr, Apr, A~
+## $ day                <fct> Wed, Wed, Wed, Wed, Wed, Wed, Wed, Wed, Wed, Wed, W~
+## $ start_time         <fct> 00:00, 00:00, 00:00, 00:00, 00:00, 00:00, 00:00, 00~
+```
+Now when all the necessary columns have been added, we need to remove some fields that are not required at the moment for our data analysis. Let's get them removed.
+
+```r
+# drop some columns that are not required for analysis
+
+df3 <- df3[, -c(3, 4, 6, 8, 9, 10, 11, 12)]
+colnames(df3$start_time)
+```
+
+```
+## NULL
+```
+As a final step of data processing stage, check for `NA` values in the data set. `Amelia` package is a convenient way to check for overall presence of `NA` values in a data set in a graphical interesting way.
+
+
+```r
+# Check for NA Values in given data set. Use Amelia package to check for NA values in given data set
+
+missmap(df3)
+```
+
+```
+## Warning: Unknown or uninitialised column: `arguments`.
+
+## Warning: Unknown or uninitialised column: `arguments`.
+```
+
+```
+## Warning: Unknown or uninitialised column: `imputations`.
+```
+
+![](cyclistic_bike_share_rmark_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+```r
+ggsave("fig_out/11.png")
+```
+
+```
+## Saving 7 x 5 in image
+```
 
 
 
