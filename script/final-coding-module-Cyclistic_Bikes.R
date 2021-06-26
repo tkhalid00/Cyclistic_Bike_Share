@@ -238,26 +238,14 @@ ggplot(data = df4) +
 
 ggsave("fig_out/01_1_weekdays_total_trips.png")
 
-
-# Trip Duration Scatter plot
-ggplot(df4) +
-  geom_point(aes(x = day, y = trip_dur)) +
-  xlab("Weekdays") +
-  ylab("Trip Duration (in Mins.)") +
-  ggtitle("Trip durations by Weekdays") +
-  scale_y_continuous(labels = scales::comma)
-
-ggsave("fig_out/02_trip_dur_wrt_weekdays_point_plot.png")
-
-
 # Draw total number of trips in member and casual segregation - Percentage
 plot_grid(
   ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
     geom_bar(aes(position = "dodge")) +
     labs(x = "Member Status", y = "no_of_trips", title = "Total Trip Segregation \nMember vs. Casual") +
     theme(legend.title = element_blank(), 
-      legend.position = "none", 
-      axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0)) +
+          legend.position = "none", 
+          axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0)) +
     scale_y_continuous(labels = scales::comma),
   ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
     geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
@@ -271,6 +259,21 @@ plot_grid(
 ggsave("fig_out/03_no_of_trips_member_vs_casual.png")
 
 
+
+# Trip Duration Scatter plot
+ggplot(df4) +
+  geom_point(aes(x = day, y = trip_dur)) +
+  xlab("Weekdays") +
+  ylab("Trip Duration (in Mins.)") +
+  ggtitle("Trip durations by Weekdays") +
+  scale_y_continuous(labels = scales::comma)
+
+ggsave("fig_out/02_trip_dur_wrt_weekdays_point_plot.png")
+
+
+
+
+
 # Create a new data frame to filter Saturday and Sunday traffic
 
 df5_sat_sun <- df4 %>% 
@@ -280,13 +283,13 @@ plot_grid(
   ggplot(data = df5_sat_sun, aes(x = day)) +
     geom_bar(aes(fill = member_casual), position = "dodge") +
     labs(x = "Weekdays", y = "No. of Trips", 
-         title = "Total no. of Trips on Weekends") +
-    theme(legend.title = element_blank(), legend.position = "none",
+         title = "Total no. of Trips on\n Weekends") +
+    theme(legend.title = element_blank(), legend.position = "left",
           axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0)) +
     scale_y_continuous(labels = scales::comma),
   ggplot(df5_sat_sun, aes(x = start_time)) +
     geom_bar(aes(fill = member_casual), position = "dodge") +
-    theme(legend.title = element_blank(), legend.position = "right",
+    theme(legend.title = element_blank(), legend.position = "none",
           axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
     labs(x = "time (hours)", y = "no. of trips", 
          title = "Trips - Round the Clock - On Weekends") +
@@ -296,7 +299,36 @@ plot_grid(
 ggsave("fig_out/05_sat_sun_trips.png")
 
 
+# Side by Side Plot Weekdays vs. Weekends
+plot_grid(
+  ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
+    geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
+    labs(x = "Member Status", y = "Percentage", title = "Total Trips \nAll Weekdays") +
+    theme(legend.position = "none") +
+    scale_y_continuous(labels = scales::percent),
+  ggplot(data = df5_sat_sun, aes(x = member_casual, fill = member_casual)) +
+    geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
+    labs(x = "Member Status", y = "", title = "Total Trips \nSaturdays & Sundays Only") +
+    theme(legend.position = "none") +
+    scale_y_continuous(labels = scales::percent)
+)  
 
+ggsave("fig_out/09_no_of_trips_weekdays_vs_weekend.png")
+
+
+# Create hourly traffic plot for Saturdays and Sundays
+ggplot(df5_sat_sun, aes(x = day)) +
+  geom_bar(aes(fill = member_casual), position = "dodge") +
+  labs(title = "Cycle Usage during the Day - Round the Clock", 
+       x = "Time in Hours", y = "No. of Trips") +
+  theme(legend.title = element_blank(), legend.position = "right",
+        axis.text.x = element_blank()
+        ) +
+  scale_y_continuous(labels = scales::comma) +
+  facet_grid(day ~ start_time)
+
+
+ggsave("fig_out/06_sat_sun_trips_pattern.png")
 
 
 
@@ -387,17 +419,7 @@ ggplot(df4, aes(x = start_time)) +
 
 
 
-ggplot(df5_sat_sun, aes(x = day)) +
-    geom_bar(aes(fill = member_casual), position = "dodge") +
-  labs(title = "Cycle Usage during the Day - Round the Clock", 
-       x = "Time in Hours", y = "No. of Trips") +
-  theme(legend.title = element_blank(), legend.position = "right",
-        axis.text.x = element_blank()) +
-  scale_y_continuous(labels = scales::comma) +
-  facet_grid(day ~ time)
 
-
-ggsave("fig_out/06_sat_sun_trips_pattern.png")
 
 
 
@@ -436,20 +458,7 @@ plot_grid(
 ggsave("fig_out/08_no_of_trips_weekdays_vs_weekend.png")
 
 
-plot_grid(
-  ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
-    geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
-    labs(x = "Member Status", y = "Percentage", title = "Total Trips \nAll Weekdays") +
-    theme(legend.position = "none") +
-    scale_y_continuous(labels = scales::percent),
-  ggplot(data = df5_sat_sun, aes(x = member_casual, fill = member_casual)) +
-    geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
-    labs(x = "Member Status", y = "", title = "Total Trips \nSaturdays & Sundays Only") +
-    theme_for_graphs +
-    scale_y_continuous(labels = scales::percent)
-)  
 
-ggsave("fig_out/09_no_of_trips_weekdays_vs_weekend.png")
 
 
 

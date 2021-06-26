@@ -367,7 +367,7 @@ ggplot(df4) +
 
 ggsave("fig_out/02_trip_dur_wrt_weekdays_point_plot.png")
 ```
-
+  
 As most of the casual riders avail Cyclistics services on weekend, we can break down hourly traffic on weekends.
 ```{r weekend-hourly-traffic}
 # Create a new data frame to filter Saturday and Sunday traffic
@@ -435,4 +435,4 @@ Both days have the same pattern as casual number of riders exceed member riders 
 By observing the above patterns, following are my three observations:
 1. Starting from Friday till Sunday, three days of the week are the busiest days of the week in which Saturdays exceeds all the other days.
 2. Saturdays and Sundays have the highest trip duration.
-3. Casual riders exceed trips exceed regualr member trips on weekends and account for more than 50% of the trips on these two days.
+3. Casual riders trips exceed regular member trips on weekends and account for more than 50% of the trips on these two days.
