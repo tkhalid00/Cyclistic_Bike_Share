@@ -270,7 +270,7 @@ str(df3$start_time)
 glimpse(df3)
 ```
 Now when all the necessary columns have been added, we need to remove some fields that are not required at the moment for our data analysis. Let's get them removed.
-```{r}
+```{r drop-unnecessary-columns}
 # drop some columns that are not required for analysis
 
 df3 <- df3[, -c(3, 4, 6, 8, 9, 10, 11, 12)]
@@ -278,12 +278,161 @@ colnames(df3$start_time)
 ```
 As a final step of data processing stage, check for `NA` values in the data set. `Amelia` package is a convenient way to check for overall presence of `NA` values in a data set in a graphical interesting way.
 
-```{r}
+```{r missing-values-check-Amelia}
 # Check for NA Values in given data set. Use Amelia package to check for NA values in given data set
 
 missmap(df3)
-ggsave("fig_out/11.png")
+
+```
+AS it can be seen in above graph, that there are around less than 1% values that are missing, and that too in `start_station_name` and `end_station_name`, these values are not going to affect our analysis much in terms of reliability, so we will leave these missing values untouched.  
+
+we would like to save this data set in a new data set for compartmentalization and easy loading in future.
+```{r}
+#Create a new data set df4 for the data that is super ready for analysis
+df4 <- df3
+save(df4, file = "data/df4.rdata")
 ```
 
 
 
+
+
+
+# Step-4 - Analysis and Visualising
+
+Now coming to the Analysis part, we will plot several graphs for visualizing several trends and patterns for member vs. casual riders. First we need to load our data set which we saved at the end of last stage.
+```{r load-d4-dataset}
+load("data/df4.rdata")
+```
+
+It would be a logical  thing if we start analyzing from drawing total number of trips occurred on each day of the week.
+```{r graph-trips-weekdays}
+# Draw total number of trips w.r.t. weekdays and save the graph
+
+ggplot(data = df4) +
+  geom_bar(aes(x = day), fill = "light blue") +
+  xlab("Weekdays") +
+  ylab("No. of Trips") +
+  ggtitle("Total no. of Trips wrt. Weekdays") +
+  scale_y_continuous(labels = scales::comma)
+
+ggsave("fig_out/01_weekdays_total_trips.png")
+```
+
+It's evident that weekends are busier than the working days so let's plot a member and non-member graph trip.
+```{r member-non-member-graph}
+# Trips by member and casual categories
+ggplot(data = df4) +
+  geom_bar(aes(x = day, fill = member_casual), position = "dodge") +
+  labs(x = "Weekdays", y = "No. of Trips", 
+       title = "Total no. of Trips wrt. Weekdays") +
+  theme(legend.title = element_blank()) +
+  scale_y_continuous(labels = scales::comma)
+
+ggsave("fig_out/01_1_weekdays_total_trips.png")
+```
+
+Now, let see how these trips are translated in terms of toal numbers and percentage in both of these categories
+```{r total-trips-and-percentage}
+# Draw total number of trips in member and casual segregation - Percentage
+plot_grid(
+  ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
+    geom_bar(aes(position = "dodge")) +
+    labs(x = "Member Status", y = "no_of_trips", title = "Total Trip Segregation \nMember vs. Casual") +
+    theme(legend.title = element_blank(), 
+          legend.position = "none", 
+          axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0)) +
+    scale_y_continuous(labels = scales::comma),
+  ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
+    geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
+    labs(x = "Member Status", y = "Percentage", title = " \n ") +
+    theme(legend.title = element_blank(), 
+          legend.position = "right", 
+          axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0))  +
+    scale_y_continuous(labels = scales::percent)
+)
+
+ggsave("fig_out/03_no_of_trips_member_vs_casual.png")
+```
+
+As depicted by the graph, on weekends, number casual cyclists jump cross the member cyclists category. Now let's examine the trip duration of these cycle trips.
+```{r trip-duration}
+# Trip Duration Scatter plot
+ggplot(df4) +
+  geom_point(aes(x = day, y = trip_dur)) +
+  xlab("Weekdays") +
+  ylab("Trip Duration (in Mins.)") +
+  ggtitle("Trip durations by Weekdays") +
+  scale_y_continuous(labels = scales::comma)
+
+ggsave("fig_out/02_trip_dur_wrt_weekdays_point_plot.png")
+```
+
+As most of the casual riders avail Cyclistics services on weekend, we can break down hourly traffic on weekends.
+```{r weekend-hourly-traffic}
+# Create a new data frame to filter Saturday and Sunday traffic
+
+df5_sat_sun <- df4 %>% 
+  filter(day == "Sat" | day == "Sun")
+
+plot_grid(
+  ggplot(data = df5_sat_sun, aes(x = day)) +
+    geom_bar(aes(fill = member_casual), position = "dodge") +
+    labs(x = "Weekdays", y = "No. of Trips", 
+         title = "Total no. of Trips on\n Weekends") +
+    theme(legend.title = element_blank(), legend.position = "left",
+          axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0)) +
+    scale_y_continuous(labels = scales::comma),
+  ggplot(df5_sat_sun, aes(x = start_time)) +
+    geom_bar(aes(fill = member_casual), position = "dodge") +
+    theme(legend.title = element_blank(), legend.position = "none",
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
+    labs(x = "time (hours)", y = "no. of trips", 
+         title = "Trips - Round the Clock - On Weekends") +
+    scale_y_continuous(labels = scales::comma)
+)
+
+ggsave("fig_out/05_sat_sun_trips.png")
+
+
+# Side by Side Plot Weekdays vs. Weekends
+plot_grid(
+  ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
+    geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
+    labs(x = "Member Status", y = "Percentage", title = "Total Trips \nAll Weekdays") +
+    theme(legend.position = "none") +
+    scale_y_continuous(labels = scales::percent),
+  ggplot(data = df5_sat_sun, aes(x = member_casual, fill = member_casual)) +
+    geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
+    labs(x = "Member Status", y = "", title = "Total Trips \nSaturdays & Sundays Only") +
+    theme(legend.position = "none") +
+    scale_y_continuous(labels = scales::percent)
+)  
+
+ggsave("fig_out/09_no_of_trips_weekdays_vs_weekend.png")
+
+```
+
+As shown in the graph, on weekends, casual riders comprise almost 50% of the total customers, as opposed to 40% of the whole week combined. Let's break down the these two days' trip in terms of timings to see if there are any patterns for peak hours.
+```{r Sat-Sun-Peak-Patterns}
+# Create hourly traffic plot for Saturdays and Sundays
+ggplot(df5_sat_sun, aes(x = day)) +
+  geom_bar(aes(fill = member_casual), position = "dodge") +
+  labs(title = "Cycle Usage during the Day - Round the Clock", 
+       x = "Time in Hours", y = "No. of Trips") +
+  theme(legend.title = element_blank(), legend.position = "right",
+        axis.text.x = element_blank()
+        ) +
+  scale_y_continuous(labels = scales::comma) +
+  facet_grid(day ~ start_time)
+
+
+ggsave("fig_out/06_sat_sun_trips_pattern.png", width = 11, height = 7, units = "in")
+```
+
+Both days have the same pattern as casual number of riders exceed member riders around 12 noon and this trend lasts till mid-night.
+
+By observing the above patterns, following are my three observations:
+1. Starting from Friday till Sunday, three days of the week are the busiest days of the week in which Saturdays exceeds all the other days.
+2. Saturdays and Sundays have the highest trip duration.
+3. Casual riders exceed trips exceed regualr member trips on weekends and account for more than 50% of the trips on these two days.

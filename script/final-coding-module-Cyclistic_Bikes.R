@@ -2,7 +2,7 @@
 
 library(tidyverse)
 library(lubridate)
-library(skimr)
+library(Amelia)
 library(scales)
 library(cowplot)
 
@@ -164,14 +164,14 @@ glimpse(df3)
 
 # add a month column
 
-df2$month <- factor(format(df2$date, "%b"),
+df3$month <- factor(format(df3$date, "%b"),
                     level = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
                               "Aug", "Sep", "Oct", "Nov", "Dec"))
-class(df2$month)
-df2$month
-
-glimpse(df2)
-
+class(df3$month)
+df3$month
+str(df3$month)
+levels(df3$month)
+glimpse(df3)
 
 
 # add a weekday column
@@ -180,86 +180,45 @@ df3$day <- factor(format(df3$date, "%a"),
                   level = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
 class(df3$day)
 df3$day
-
-
-
-
-
-
-
-
-
-
-
-
-
+str(df3$day)
+levels(df3$day)
 
 # add a time column to create time bins for future analysis
 
-df2$time <- factor(format(df2$started_at, "%H:00")) 
-df2$time <- format(df2$started_at, "%H:00")
-df2$time <- as_datetime(format(df2$started_at, "%H:00"))
+df3$start_time <- factor(format(df3$started_at, "%H:00")) 
 
-df2$time
-class(df2$time)
-levels(df2$time)
+df3$start_time
+class(df3$start_time)
+levels(df3$start_time)
+str(df3$start_time)
 
+colnames(df3)
 
-dev.off()
-par(mfrow = c(1, 2), cex = 0.7)
-barplot(table(df2$month))
-barplot(table(df2$day))
+# drop some columns that are not required for analysis
 
+df3 <- df3[, -c(3, 4, 6, 8, 9, 10, 11, 12)]
 
-df2 %>% filter(is.na(month))
-df2 %>% filter(is.na(day))
+# Check for NA Values in given data set. Use Amelia package to check for NA values in given data set
 
-
-
-summary(neg_dur$trip_dur)
-
-
-dev.off()
-par(mfrow = c(1, 2), cex = 0.7)
-hist(neg_dur$trip_dur)
-boxplot(neg_dur$trip_dur)
+missmap(df3)
 
 
 
 
+#Create a new data set df4 for the data that is super ready for analysis
+df4 <- df3
+save(df4, file = "data/df4.rdata")
 
 
 
 
+# Data Analysis ================
+
+load("data/df4.rdata")
 
 
-
-
-
-
-
-
-
-
-
-dev.off()
-par(mfrow = c(1, 2), cex = 0.7)
-hist(df3$trip_dur)
-boxplot(df3$trip_dur)
-
-
-
-dev.off()
-par(mfrow = c(1, 2), cex = 0.7)
-
-hist(df3$trip_dur, main = "Histogram - Trip Duration", xlab = "Trip Duration - min",
-     ylab = "no of trips")
-boxplot(df3$trip_dur, horizontal = TRUE, main = "Histogram - Trip Duration", 
-        xlab = "Trip Duration - min",
-        ylab = "no of trips")
-
-
-ggplot(data = df3) +
+# Draw total number of trips w.r.t. weekdays
+ggplot(data = df4) +
   geom_bar(aes(x = day), fill = "light blue") +
   xlab("Weekdays") +
   ylab("No. of Trips") +
@@ -269,8 +228,19 @@ ggplot(data = df3) +
 ggsave("fig_out/01_weekdays_total_trips.png")
 
 
+# Trips by member and casual categories
+ggplot(data = df4) +
+  geom_bar(aes(x = day, fill = member_casual), position = "dodge") +
+  labs(x = "Weekdays", y = "No. of Trips", 
+       title = "Total no. of Trips wrt. Weekdays") +
+  theme(legend.title = element_blank()) +
+  scale_y_continuous(labels = scales::comma)
 
-ggplot(df3) +
+ggsave("fig_out/01_1_weekdays_total_trips.png")
+
+
+# Trip Duration Scatter plot
+ggplot(df4) +
   geom_point(aes(x = day, y = trip_dur)) +
   xlab("Weekdays") +
   ylab("Trip Duration (in Mins.)") +
@@ -280,9 +250,86 @@ ggplot(df3) +
 ggsave("fig_out/02_trip_dur_wrt_weekdays_point_plot.png")
 
 
+# Draw total number of trips in member and casual segregation - Percentage
+plot_grid(
+  ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
+    geom_bar(aes(position = "dodge")) +
+    labs(x = "Member Status", y = "no_of_trips", title = "Total Trip Segregation \nMember vs. Casual") +
+    theme(legend.title = element_blank(), 
+      legend.position = "none", 
+      axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0)) +
+    scale_y_continuous(labels = scales::comma),
+  ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
+    geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
+    labs(x = "Member Status", y = "Percentage", title = " \n ") +
+    theme(legend.title = element_blank(), 
+          legend.position = "right", 
+          axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0))  +
+    scale_y_continuous(labels = scales::percent)
+)
+
+ggsave("fig_out/03_no_of_trips_member_vs_casual.png")
+
+
+# Create a new data frame to filter Saturday and Sunday traffic
+
+df5_sat_sun <- df4 %>% 
+  filter(day == "Sat" | day == "Sun")
+
+plot_grid(
+  ggplot(data = df5_sat_sun, aes(x = day)) +
+    geom_bar(aes(fill = member_casual), position = "dodge") +
+    labs(x = "Weekdays", y = "No. of Trips", 
+         title = "Total no. of Trips on Weekends") +
+    theme(legend.title = element_blank(), legend.position = "none",
+          axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0)) +
+    scale_y_continuous(labels = scales::comma),
+  ggplot(df5_sat_sun, aes(x = start_time)) +
+    geom_bar(aes(fill = member_casual), position = "dodge") +
+    theme(legend.title = element_blank(), legend.position = "right",
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
+    labs(x = "time (hours)", y = "no. of trips", 
+         title = "Trips - Round the Clock - On Weekends") +
+    scale_y_continuous(labels = scales::comma)
+)
+
+ggsave("fig_out/05_sat_sun_trips.png")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dev.off()
+par(mfrow = c(1, 2), cex = 0.7)
+hist(df4$trip_dur)
+boxplot(df4$trip_dur)
+
+
+
+dev.off()
+par(mfrow = c(1, 2), cex = 0.7)
+
+hist(df4$trip_dur, main = "Histogram - Trip Duration", xlab = "Trip Duration - min",
+     ylab = "no of trips")
+boxplot(df4$trip_dur, horizontal = TRUE, main = "Histogram - Trip Duration", 
+        xlab = "Trip Duration - min",
+        ylab = "no of trips")
+
+
+
+
 # Draw total number of trips in member and casual segregation
 
-ggplot(data = df3, aes(x = member_casual, fill = member_casual)) +
+ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
   geom_bar(aes(position = "dodge")) +
   xlab("Weekdays") +
   ylab("No. of Trips") +
@@ -306,7 +353,7 @@ theme_for_graphs_v <- theme(
 
 # Draw total number of trips in member and casual segregation - Percentage
 
-ggplot(data = df3, aes(x = member_casual, fill = member_casual)) +
+ggplot(data = df4, aes(x = member_casual, fill = member_casual)) +
   geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
   xlab("Member Status") +
   ylab("Percentage") +
@@ -314,25 +361,10 @@ ggplot(data = df3, aes(x = member_casual, fill = member_casual)) +
   scale_y_continuous(labels = scales::percent)
 
 
-plot_grid(
-  ggplot(data = df3, aes(x = member_casual, fill = member_casual)) +
-    geom_bar(aes(position = "dodge")) +
-    labs(x = "Member Status", y = "no_of_trips", title = "Total Trip Segregation \nMember vs. Casual") +
-    theme_for_graphs +
-    scale_y_continuous(labels = scales::comma),
-  ggplot(data = df3, aes(x = member_casual, fill = member_casual)) +
-    geom_bar(aes(y = (..count..)/sum(..count..), position = "dodge")) +
-    labs(x = "Member Status", y = "Percentage", title = " \n ") +
-    theme_for_graphs +
-    scale_y_continuous(labels = scales::percent)
-  
-)
 
 
-ggsave("fig_out/03_no_of_trips_member_vs_casual.png")
 
-
-ggplot(data = df3, aes(x = day)) +
+ggplot(data = df4, aes(x = day)) +
   geom_bar(aes(fill = member_casual), position = "dodge") +
   xlab("Weekdays") +
   ylab("No. of Trips") +
@@ -341,63 +373,18 @@ ggplot(data = df3, aes(x = day)) +
   scale_y_continuous(labels = scales::comma)
 
 
-df4 <- df3 %>% 
-  select(rideable_type, start_station_id, start_station_name, end_station_id,
-         end_station_name,  member_casual, trip_dur, date, day, month, time)
-
-save(df4, file = "data/df4.rdata")
-
-load("data/df4.rdata")
-glimpse(df4)
-
-
-ggplot(data = df4) +
-  geom_bar(aes(x = day, fill = member_casual), position = "dodge") +
-  labs(x = "Weekdays", y = "No. of Trips", 
-       title = "Total no. of Trips wrt. Weekdays") +
-  theme(legend.title = element_blank()) +
-  scale_y_continuous(labels = scales::comma)
-
-ggsave("fig_out/01_1_weekdays_total_trips.png")
-
-
-
 # graph Busy hours round the clock
-ggplot(df4, aes(x = time)) +
+ggplot(df4, aes(x = start_time)) +
   geom_bar(aes(fill = member_casual), position = "dodge") +
-  theme(legend.title = element_blank()) +
+  theme(legend.title = element_blank(), 
+    legend.position = "right", 
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
   labs(x = "time (hours)", y = "no. of trips", 
        title = "Trips - Round the Clock") +
   scale_y_continuous(labels = scales::comma)
 
 
-# Create a new data frame to filter Saturday and Sunday traffic
 
-df5_sat_sun <- df4 %>% 
-  filter(day == "Sat" | day == "Sun")
-
-df5_sat_sun
-
-
-plot_grid(
-  ggplot(data = df5_sat_sun, aes(x = day)) +
-    geom_bar(aes(fill = member_casual), position = "dodge") +
-    labs(x = "Weekdays", y = "No. of Trips", 
-         title = "Total no. of Trips wrt. Weekdays") +
-    theme(legend.title = element_blank(), legend.position = "none",
-          axis.text.x = element_text(angle = 0, vjust = 0.5, hjust = 0)) +
-    scale_y_continuous(labels = scales::comma),
-  ggplot(df5_sat_sun, aes(x = time)) +
-    geom_bar(aes(fill = member_casual), position = "dodge") +
-    theme(legend.title = element_blank(), legend.position = "right",
-          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
-    labs(x = "time (hours)", y = "no. of trips", 
-         title = "Trips - Round the Clock") +
-    scale_y_continuous(labels = scales::comma)
-)
-
-
-ggsave("fig_out/05_sat_sun_trips.png")
 
 
 ggplot(df5_sat_sun, aes(x = day)) +
